@@ -3,7 +3,7 @@
 <head>
     <meta charset="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>卡片展示</title>
+    <title>卡片展示平台</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -34,14 +34,16 @@
             background-color: #ffffff;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
+            justify-content: center;
         }
         .filter-section select, .filter-section input {
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            flex-grow: 1;
             min-width: 180px;
+            flex-grow: 1;
+            max-width: 300px;
         }
         .filter-section button {
             padding: 10px 20px;
@@ -51,48 +53,30 @@
             border-radius: 5px;
             font-size: 16px;
             cursor: pointer;
-            flex-grow: 1;
             min-width: 120px;
         }
         .filter-section button:hover {
             background-color: #0056b3;
         }
-        .category {
-            margin-bottom: 40px;
-        }
-        .category-title {
-            font-size: 28px;
-            color: #444;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #444;
-            padding-bottom: 10px;
-            padding-left: 5px;
-        }
-        .provider-section {
-            margin-bottom: 30px;
-        }
-        .provider-title {
-            font-size: 24px;
-            color: #666;
-            margin-bottom: 15px;
-            padding-left: 10px;
-            border-left: 5px solid #666;
-        }
-        .cards {
+        .cards-container {
             display: flex;
             flex-wrap: wrap;
+            justify-content: center;
             gap: 20px;
+            margin-top: 20px;
         }
         .card {
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 15px;
             background-color: #ffffff;
-            width: calc(33.333% - 20px);
+            width: 100%;
+            max-width: 300px;
             box-sizing: border-box;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s;
             display: none; /* Initially hide all cards */
+            text-align: center;
         }
         .card:hover {
             transform: translateY(-5px);
@@ -131,9 +115,26 @@
             padding: 8px 12px;
             border-radius: 5px;
             text-decoration: none;
+            display: inline-block;
         }
         .card-order-link a:hover {
             background-color: #0056b3;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .filter-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            .filter-section select, .filter-section input, .filter-section button {
+                max-width: 100%;
+                flex-grow: 1;
+                margin-bottom: 10px;
+            }
+            .card {
+                max-width: 100%;
+            }
         }
     </style>
 </head>
@@ -155,12 +156,13 @@
             <input type="text" id="search-input" placeholder="搜索标题或描述...">
             <button id="search-button">搜索</button>
         </div>
-        
-        <div id="app"></div>
+
+        <div id="app" class="cards-container"></div>
     </div>
 
     <script>
         let allCards = [];
+        let dataCache = {};
 
         // 从本地 JSON 文件加载数据
         fetch('data.json')
@@ -168,14 +170,14 @@
             .then(data => {
                 const app = document.getElementById('app');
                 const priceFilter = document.getElementById('price-filter');
+                const providerFilter = document.getElementById('provider-filter');
+
+                // 缓存数据以用于筛选条件相互制约
+                dataCache = data;
 
                 // 填充价格筛选选项
-                for (const price in data) {
-                    const option = document.createElement('option');
-                    option.value = price;
-                    option.textContent = `${price}元套餐`;
-                    priceFilter.appendChild(option);
-                }
+                populatePriceOptions(data);
+                populateProviderOptions(data, priceFilter.value);
 
                 // 保存所有卡片数据用于懒加载和筛选
                 for (const price in data) {
@@ -193,97 +195,124 @@
                 }
 
                 // 过滤并展示卡片
-                function filterAndDisplayCards() {
-                    const selectedPrice = priceFilter.value;
-                    const selectedProvider = document.getElementById('provider-filter').value;
-                    const searchText = document.getElementById('search-input').value.toLowerCase();
-
-                    // 清空当前展示的卡片
-                    app.innerHTML = '';
-
-                    const filteredCards = allCards.filter(card => {
-                        const matchesPrice = selectedPrice === '' || card.price === selectedPrice;
-                        const matchesProvider = selectedProvider === '' || card.provider === selectedProvider;
-                        const matchesSearch = card.Title.toLowerCase().includes(searchText) || card.Description.toLowerCase().includes(searchText);
-                        return matchesPrice && matchesProvider && matchesSearch;
-                    });
-
-                    if (filteredCards.length === 0) {
-                        app.textContent = '没有找到匹配的卡片';
-                        return;
-                    }
-
-                    filteredCards.forEach(card => {
-                        const cardDiv = document.createElement('div');
-                        cardDiv.classList.add('card');
-
-                        const img = document.createElement('img');
-                        img.dataset.src = card.Image_URL;
-                        img.classList.add('lazy');
-                        cardDiv.appendChild(img);
-
-                        const cardDetailsDiv = document.createElement('div');
-                        cardDetailsDiv.classList.add('card-details');
-
-                        const cardTitle = document.createElement('h4');
-                        cardTitle.classList.add('card-title');
-                        cardTitle.textContent = card.Title;
-                        cardDetailsDiv.appendChild(cardTitle);
-
-                        const cardDescription = document.createElement('p');
-                        cardDescription.classList.add('card-description');
-                        cardDescription.textContent = card.Description;
-                        cardDetailsDiv.appendChild(cardDescription);
-
-                        const cardPriceDetails = document.createElement('p');
-                        cardPriceDetails.classList.add('card-price-details');
-                        cardPriceDetails.textContent = card.Price_Details;
-                        cardDetailsDiv.appendChild(cardPriceDetails);
-
-                        const cardOrderLinkDiv = document.createElement('div');
-                        cardOrderLinkDiv.classList.add('card-order-link');
-                        const orderLink = document.createElement('a');
-                        orderLink.href = card.Order_Link;
-                        orderLink.target = "_blank";
-                        orderLink.textContent = "办理";
-                        cardOrderLinkDiv.appendChild(orderLink);
-                        cardDetailsDiv.appendChild(cardOrderLinkDiv);
-
-                        cardDiv.appendChild(cardDetailsDiv);
-                        app.appendChild(cardDiv);
-
-                        // 懒加载图片
-                        const lazyImages = document.querySelectorAll('.lazy');
-                        const lazyLoad = (entries, observer) => {
-                            entries.forEach(entry => {
-                                if (entry.isIntersecting) {
-                                    const img = entry.target;
-                                    img.src = img.dataset.src;
-                                    img.classList.remove('lazy');
-                                    observer.unobserve(img);
-                                }
-                            });
-                        };
-
-                        const observer = new IntersectionObserver(lazyLoad);
-                        lazyImages.forEach(img => observer.observe(img));
-
-                        // 显示卡片
-                        cardDiv.style.display = 'block';
-                    });
-                }
-
-                // 初始化页面展示
                 filterAndDisplayCards();
 
                 // 绑定筛选和搜索事件
-                document.getElementById('price-filter').addEventListener('change', filterAndDisplayCards);
-                document.getElementById('provider-filter').addEventListener('change', filterAndDisplayCards);
+                priceFilter.addEventListener('change', function() {
+                    populateProviderOptions(dataCache, priceFilter.value);
+                    filterAndDisplayCards();
+                });
+                providerFilter.addEventListener('change', filterAndDisplayCards);
                 document.getElementById('search-button').addEventListener('click', filterAndDisplayCards);
             })
             .catch(error => {
                 console.error('Error loading JSON data:', error);
             });
+
+        function populatePriceOptions(data) {
+            const priceFilter = document.getElementById('price-filter');
+            priceFilter.innerHTML = '<option value="">所有价格</option>';
+            for (const price in data) {
+                const option = document.createElement('option');
+                option.value = price;
+                option.textContent = `${price}元套餐`;
+                priceFilter.appendChild(option);
+            }
+        }
+
+        function populateProviderOptions(data, selectedPrice) {
+            const providerFilter = document.getElementById('provider-filter');
+            providerFilter.innerHTML = '<option value="">所有运营商</option>';
+
+            const providers = new Set();
+
+            if (selectedPrice && data[selectedPrice]) {
+                for (const provider in data[selectedPrice]) {
+                    if (data[selectedPrice][provider].length > 0) {
+                        providers.add(provider);
+                    }
+                }
+            } else {
+                for (const price in data) {
+                    for (const provider in data[price]) {
+                        if (data[price][provider].length > 0) {
+                            providers.add(provider);
+                        }
+                    }
+                }
+            }
+
+            providers.forEach(provider => {
+                const option = document.createElement('option');
+                option.value = provider;
+                option.textContent = provider;
+                providerFilter.appendChild(option);
+            });
+        }
+
+        function filterAndDisplayCards() {
+            const selectedPrice = document.getElementById('price-filter').value;
+            const selectedProvider = document.getElementById('provider-filter').value;
+            const searchText = document.getElementById('search-input').value.toLowerCase();
+            const app = document.getElementById('app');
+
+            // 清空当前展示的卡片
+            app.innerHTML = '';
+
+            const filteredCards = allCards.filter(card => {
+                const matchesPrice = selectedPrice === '' || card.price === selectedPrice;
+                const matchesProvider = selectedProvider === '' || card.provider === selectedProvider;
+                const matchesSearch = card.Title.toLowerCase().includes(searchText) || card.Description.toLowerCase().includes(searchText);
+                return matchesPrice && matchesProvider && matchesSearch;
+            });
+
+            if (filteredCards.length === 0) {
+                app.textContent = '没有找到匹配的卡片';
+                return;
+            }
+
+            filteredCards.forEach(card => {
+                const cardDiv = document.createElement('div');
+                cardDiv.classList.add('card');
+
+                const img = document.createElement('img');
+                img.src = card.Image_URL;
+                cardDiv.appendChild(img);
+
+                const cardDetailsDiv = document.createElement('div');
+                cardDetailsDiv.classList.add('card-details');
+
+                const cardTitle = document.createElement('h4');
+                cardTitle.classList.add('card-title');
+                cardTitle.textContent = card.Title;
+                cardDetailsDiv.appendChild(cardTitle);
+
+                const cardDescription = document.createElement('p');
+                cardDescription.classList.add('card-description');
+                cardDescription.textContent = card.Description;
+                cardDetailsDiv.appendChild(cardDescription);
+
+                const cardPriceDetails = document.createElement('p');
+                cardPriceDetails.classList.add('card-price-details');
+                cardPriceDetails.textContent = card.Price_Details;
+                cardDetailsDiv.appendChild(cardPriceDetails);
+
+                const cardOrderLinkDiv = document.createElement('div');
+                cardOrderLinkDiv.classList.add('card-order-link');
+                const orderLink = document.createElement('a');
+                orderLink.href = card.Order_Link;
+                orderLink.target = "_blank";
+                orderLink.textContent = "办理";
+                cardOrderLinkDiv.appendChild(orderLink);
+                cardDetailsDiv.appendChild(cardOrderLinkDiv);
+
+                cardDiv.appendChild(cardDetailsDiv);
+                app.appendChild(cardDiv);
+
+                // 显示卡片
+                cardDiv.style.display = 'block';
+            });
+        }
     </script>
 </body>
 </html>
