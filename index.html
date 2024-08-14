@@ -35,9 +35,9 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             justify-content: center;
-            position: sticky; /* 固定位置 */
+            position: sticky;
             top: 0;
-            z-index: 1000; /* 保证在其他内容上方 */
+            z-index: 1000;
         }
         .filter-section select, .filter-section input {
             padding: 10px;
@@ -65,8 +65,8 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 30px; /* 增加间距 */
-            margin-top: 40px; /* 增加顶部与过滤栏的间距 */
+            gap: 30px;
+            margin-top: 40px;
         }
         .card {
             border: 1px solid #ddd;
@@ -78,12 +78,13 @@
             box-sizing: border-box;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s;
-            display: none; /* Initially hide all cards */
+            display: none;
             text-align: center;
-            min-height: 520px; /* 增加最小高度 */
+            min-height: 480px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            cursor: pointer; /* 鼠标变为手型，表示可点击 */
         }
         .card:hover {
             transform: translateY(-5px);
@@ -91,13 +92,13 @@
         }
         .card img {
             max-width: 100%;
-            max-height: 220px; /* 增加图片高度 */
+            max-height: 220px;
             border-radius: 8px;
             margin-bottom: 15px;
             display: block;
             object-fit: cover;
             margin-left: auto;
-            margin-right: auto; /* 图片居中 */
+            margin-right: auto;
         }
         .card-details {
             flex-grow: 1;
@@ -105,55 +106,78 @@
             margin-bottom: 10px;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* 确保内容在上方 */
-            align-items: center; /* 居中对齐 */
+            justify-content: space-between;
+            align-items: center;
         }
         .card-title {
-            font-size: 20px; /* 增加字体大小 */
+            font-size: 20px;
             color: #333;
             margin: 0 0 10px;
         }
         .card-description {
             color: #777;
             margin: 0 0 10px;
-            font-size: 16px; /* 增加描述文字大小 */
+            font-size: 16px;
         }
         .card-price-details {
             color: #555;
-            font-size: 16px; /* 增加价格详情文字大小 */
-        }
-        .card-order-link {
-            margin-top: 10px;
-            align-self: center; /* 按钮居中 */
-        }
-        .card-order-link a {
-            color: white;
-            background-color: #007bff;
-            padding: 12px 20px; /* 增加按钮大小 */
-            border-radius: 5px;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px; /* 增加按钮文字大小 */
-        }
-        .card-order-link a:hover {
-            background-color: #0056b3;
+            font-size: 16px;
         }
 
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .filter-section {
-                flex-direction: column;
-                align-items: center;
-            }
-            .filter-section select, .filter-section input, .filter-section button {
-                max-width: 100%;
-                flex-grow: 1;
-                margin-bottom: 10px;
-            }
-            .card {
-                max-width: 100%;
-                width: 100%; /* 使卡片在小屏幕上占满宽度 */
-            }
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+            text-align: center;
+        }
+        .modal-content p {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal-footer {
+            text-align: right;
+        }
+        .modal-footer button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -177,6 +201,17 @@
         </div>
 
         <div id="app" class="cards-container"></div>
+    </div>
+
+    <!-- 弹窗 -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <p>这里是自定义弹窗内容。你可以在这里放置任何你想要展示的信息。</p>
+            <div class="modal-footer">
+                <button id="modalCloseButton">关闭</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -316,21 +351,43 @@
                 cardPriceDetails.textContent = card.Price_Details;
                 cardDetailsDiv.appendChild(cardPriceDetails);
 
-                const cardOrderLinkDiv = document.createElement('div');
-                cardOrderLinkDiv.classList.add('card-order-link');
-                const orderLink = document.createElement('a');
-                orderLink.href = card.Order_Link;
-                orderLink.target = "_blank";
-                orderLink.textContent = "办理";
-                cardOrderLinkDiv.appendChild(orderLink);
-                cardDetailsDiv.appendChild(cardOrderLinkDiv);
-
                 cardDiv.appendChild(cardDetailsDiv);
                 app.appendChild(cardDiv);
+
+                // 将点击事件绑定到整个卡片
+                cardDiv.addEventListener('click', function() {
+                    window.open(card.Order_Link, '_blank');
+                });
 
                 // 显示卡片
                 cardDiv.style.display = 'block';
             });
+        }
+
+        // 弹窗控制
+        const modal = document.getElementById('myModal');
+        const closeModal = document.getElementById('closeModal');
+        const modalCloseButton = document.getElementById('modalCloseButton');
+
+        // 打开弹窗
+        window.onload = function() {
+            modal.style.display = 'block';
+        }
+
+        // 关闭弹窗
+        closeModal.onclick = function() {
+            modal.style.display = 'none';
+        }
+
+        modalCloseButton.onclick = function() {
+            modal.style.display = 'none';
+        }
+
+        // 点击窗口外部时关闭弹窗
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
         }
     </script>
 </body>
