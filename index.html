@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡片展示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .category {
+            margin-bottom: 40px;
+        }
+        .category-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+        }
+        .provider-section {
+            margin-bottom: 20px;
+        }
+        .provider-title {
+            font-size: 20px;
+            color: #555;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 4px solid #555;
+        }
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #fff;
+            width: calc(33.333% - 20px);
+            box-sizing: border-box;
+        }
+        .card img {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+        .card-details {
+            max-width: 100%;
+        }
+        .card-title {
+            font-size: 18px;
+            color: #333;
+            margin: 0 0 10px;
+        }
+        .card-description {
+            color: #777;
+            margin: 0 0 10px;
+        }
+        .card-price-details {
+            color: #555;
+            font-size: 14px;
+        }
+        .card-order-link {
+            margin-top: 10px;
+        }
+        .card-order-link a {
+            color: white;
+            background-color: #007bff;
+            padding: 8px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .card-order-link a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // 从本地 JSON 文件加载数据
+        fetch('data.json')
+            .then(response => response.json())
+            .then(data => {
+                const app = document.getElementById('app');
+
+                for (const price in data) {
+                    const categories = data[price];
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.classList.add('category');
+                    const categoryTitle = document.createElement('h2');
+                    categoryTitle.classList.add('category-title');
+                    categoryTitle.textContent = `${price}元套餐`;
+                    categoryDiv.appendChild(categoryTitle);
+
+                    for (const provider in categories) {
+                        if (categories[provider].length > 0) {
+                            const providerSection = document.createElement('div');
+                            providerSection.classList.add('provider-section');
+
+                            const providerTitle = document.createElement('h3');
+                            providerTitle.classList.add('provider-title');
+                            providerTitle.textContent = provider;
+                            providerSection.appendChild(providerTitle);
+
+                            const cardsDiv = document.createElement('div');
+                            cardsDiv.classList.add('cards');
+
+                            categories[provider].forEach(card => {
+                                const cardDiv = document.createElement('div');
+                                cardDiv.classList.add('card');
+
+                                const img = document.createElement('img');
+                                img.src = card.Image_URL;
+                                cardDiv.appendChild(img);
+
+                                const cardDetailsDiv = document.createElement('div');
+                                cardDetailsDiv.classList.add('card-details');
+
+                                const cardTitle = document.createElement('h4');
+                                cardTitle.classList.add('card-title');
+                                cardTitle.textContent = card.Title;
+                                cardDetailsDiv.appendChild(cardTitle);
+
+                                const cardDescription = document.createElement('p');
+                                cardDescription.classList.add('card-description');
+                                cardDescription.textContent = card.Description;
+                                cardDetailsDiv.appendChild(cardDescription);
+
+                                const cardPriceDetails = document.createElement('p');
+                                cardPriceDetails.classList.add('card-price-details');
+                                cardPriceDetails.textContent = card.Price_Details;
+                                cardDetailsDiv.appendChild(cardPriceDetails);
+
+                                const cardOrderLinkDiv = document.createElement('div');
+                                cardOrderLinkDiv.classList.add('card-order-link');
+                                const orderLink = document.createElement('a');
+                                orderLink.href = card.Order_Link;
+                                orderLink.target = "_blank";
+                                orderLink.textContent = "办理";
+                                cardOrderLinkDiv.appendChild(orderLink);
+                                cardDetailsDiv.appendChild(cardOrderLinkDiv);
+
+                                cardDiv.appendChild(cardDetailsDiv);
+                                cardsDiv.appendChild(cardDiv);
+                            });
+
+                            providerSection.appendChild(cardsDiv);
+                            categoryDiv.appendChild(providerSection);
+                        }
+                    }
+                    app.appendChild(categoryDiv);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading JSON data:', error);
+            });
+    </script>
+</body>
+</html>
