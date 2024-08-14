@@ -3,7 +3,7 @@
 <head>
     <meta charset="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>卡片展示平台</title>
+    <title>华子Net号卡选购平台</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -38,7 +38,6 @@
             position: sticky; /* 固定位置 */
             top: 0;
             z-index: 1000; /* 保证在其他内容上方 */
-            margin-top: 20px;
         }
         .filter-section select, .filter-section input {
             padding: 10px;
@@ -81,7 +80,7 @@
             transition: transform 0.2s;
             display: none; /* Initially hide all cards */
             text-align: center;
-            min-height: 450px; /* 增加最小高度 */
+            min-height: 480px; /* 增加最小高度 */
             display: flex;
             flex-direction: column;
             justify-content: space-between; /* 确保按钮在底部 */
@@ -104,6 +103,9 @@
             flex-grow: 1;
             max-width: 100%;
             margin-bottom: 10px; /* 增加下方间距 */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .card-title {
             font-size: 20px; /* 增加字体大小 */
