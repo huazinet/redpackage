@@ -77,6 +77,10 @@
             transition: transform 0.2s;
             display: none; /* Initially hide all cards */
             text-align: center;
+            min-height: 450px; /* 增加最小高度 */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* 确保按钮在底部 */
         }
         .card:hover {
             transform: translateY(-5px);
@@ -93,7 +97,9 @@
             margin-right: auto; /* 图片居中 */
         }
         .card-details {
+            flex-grow: 1;
             max-width: 100%;
+            margin-bottom: 10px; /* 增加下方间距 */
         }
         .card-title {
             font-size: 20px; /* 增加字体大小 */
@@ -111,6 +117,7 @@
         }
         .card-order-link {
             margin-top: 10px;
+            align-self: center; /* 按钮居中 */
         }
         .card-order-link a {
             color: white;
