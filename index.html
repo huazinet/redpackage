@@ -3,7 +3,7 @@
 <head>
     <meta charset="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>华子Net号卡平台</title>
+    <title>卡片展示平台</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -35,6 +35,10 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             justify-content: center;
+            position: sticky; /* 固定位置 */
+            top: 0;
+            z-index: 1000; /* 保证在其他内容上方 */
+            margin-top: 20px;
         }
         .filter-section select, .filter-section input {
             padding: 10px;
@@ -63,7 +67,7 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 30px; /* 增加间距 */
-            margin-top: 20px;
+            margin-top: 40px; /* 增加顶部与过滤栏的间距 */
         }
         .card {
             border: 1px solid #ddd;
