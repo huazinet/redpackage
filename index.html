@@ -124,6 +124,24 @@
             font-size: 16px;
         }
 
+        /* 办理按钮样式 */
+        .order-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 0;
+            width: 50%;
+            margin: 10px auto 0;
+            display: block;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .order-button:hover {
+            background-color: #218838;
+        }
+
         /* 弹窗样式 */
         .modal {
             display: none;
@@ -353,6 +371,16 @@
                 cardPriceDetails.classList.add('card-price-details');
                 cardPriceDetails.textContent = card.Price_Details;
                 cardDetailsDiv.appendChild(cardPriceDetails);
+
+                // 添加办理按钮
+                const orderButton = document.createElement('button');
+                orderButton.classList.add('order-button');
+                orderButton.textContent = '办理';
+                orderButton.addEventListener('click', function(event) {
+                    event.stopPropagation(); // 阻止事件冒泡，避免触发卡片的点击事件
+                    window.open(card.Order_Link, '_blank');
+                });
+                cardDiv.appendChild(orderButton);
 
                 cardDiv.appendChild(cardDetailsDiv);
                 app.appendChild(cardDiv);
